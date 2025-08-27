@@ -1,0 +1,122 @@
+# RedFire前端开发环境Docker Compose配置
+# ===========================================
+
+version: '3.8'
+
+services:
+  # 前端开发服务
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: redfire-frontend-dev
+    ports:
+      - "3000:3000"  # Web应用
+      - "3001:3001"  # 移动应用
+      - "3002:3002"  # 管理后台
+      - "3003:3003"  # 交易终端
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - frontend_cache:/app/.turbo
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://localhost:8000
+      - WS_URL=ws://localhost:8001
+      - FAST_REFRESH=true
+    networks:
+      - redfire-dev
+    restart: unless-stopped
+    depends_on:
+      - backend-api
+      - backend-websocket
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`frontend.redfire.local`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+  # Storybook开发服务
+  storybook-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: redfire-storybook-dev
+    ports:
+      - "6006:6006"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "storybook"]
+    networks:
+      - redfire-dev
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.storybook.rule=Host(`storybook.redfire.local`)"
+      - "traefik.http.routers.storybook.entrypoints=web"
+
+  # 后端API服务（模拟）
+  backend-api:
+    image: node:18-alpine
+    container_name: redfire-backend-api-mock
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dev-server:/app
+    working_dir: /app
+    command: ["node", "api-server.js"]
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+    networks:
+      - redfire-dev
+    restart: unless-stopped
+
+  # WebSocket服务（模拟）
+  backend-websocket:
+    image: node:18-alpine
+    container_name: redfire-backend-ws-mock
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./dev-server:/app
+    working_dir: /app
+    command: ["node", "ws-server.js"]
+    environment:
+      - NODE_ENV=development
+      - PORT=8001
+    networks:
+      - redfire-dev
+    restart: unless-stopped
+
+  # 代理服务
+  traefik:
+    image: traefik:v2.10
+    container_name: redfire-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Traefik仪表板
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - redfire-dev
+    restart: unless-stopped
+
+volumes:
+  frontend_cache:
+    driver: local
+
+networks:
+  redfire-dev:
+    driver: bridge
+    name: redfire-development

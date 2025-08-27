@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedFire系统架构讨论文档 - 修复版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; padding: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; margin: -20px -20px 40px -20px; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .section { margin-bottom: 40px; }
+        .section h2 { color: #667eea; font-size: 2rem; margin-bottom: 20px; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+        .diagram-container { background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+        .diagram-title { color: #667eea; font-size: 1.3rem; margin-bottom: 15px; font-weight: bold; }
+        .mermaid { background: white; border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 300px; border: 2px solid #667eea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 RedFire量化交易系统</h1>
+            <p>系统架构详解与技术讨论文档 - Mermaid修复版</p>
+        </div>
+
+        <div class="section">
+            <h2>📊 架构图表</h2>
+            
+            <div class="diagram-container">
+                <div class="diagram-title">🏗️ 系统整体架构图</div>
+                <div class="mermaid">
+                    graph TB
+                        User["🌐 用户层<br/>Web用户 + 移动用户"] --> Frontend["🎨 前端层<br/>React + TypeScript"]
+                        Frontend --> Gateway["🔌 API网关层<br/>FastAPI + WebSocket"]
+                        Gateway --> Backend["⚙️ 后端层<br/>微服务架构"]
+                        Backend --> Data["🗄️ 数据层<br/>MySQL + Redis"]
+                        Backend --> External["🌍 外部接口层<br/>CTP + IB + OKEX"]
+                        
+                        subgraph "Frontend"
+                            WebApp["Web应用<br/>:3000"]
+                            UILib["UI组件库"]
+                            BizLib["业务组件库"]
+                        end
+                        
+                        subgraph "Backend Services"
+                            VnpyCore["VnPy核心服务<br/>:8006"]
+                            UserService["用户交易服务<br/>:8001"]
+                            DataService["策略数据服务<br/>:8002"]
+                            GatewayService["网关适配服务<br/>:8004"]
+                            MonitorService["监控通知服务<br/>:8005"]
+                        end
+                        
+                        Frontend --> WebApp
+                        Backend --> VnpyCore
+                        Backend --> UserService
+                        Backend --> DataService
+                        Backend --> GatewayService
+                        Backend --> MonitorService
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 数据流向图</div>
+                <div class="mermaid">
+                    graph LR
+                        A["用户操作"] --> B["前端界面"]
+                        B --> C["API网关"]
+                        C --> D["后端服务"]
+                        D --> E["数据存储"]
+                        
+                        F["市场数据"] --> G["数据引擎"]
+                        G --> H["事件引擎"]
+                        H --> I["策略引擎"]
+                        I --> J["交易执行"]
+                        
+                        K["WebSocket"] --> L["实时推送"]
+                        L --> M["前端更新"]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mermaid脚本加载和初始化 -->
+    <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+    <script>
+        // 等待页面完全加载
+        window.addEventListener('load', function() {
+            // 延迟初始化确保脚本加载完成
+            setTimeout(function() {
+                if (typeof mermaid !== 'undefined') {
+                    try {
+                        // 使用旧版本的稳定配置
+                        mermaid.initialize({
+                            startOnLoad: false,
+                            theme: 'default',
+                            securityLevel: 'loose',
+                            flowchart: {
+                                useMaxWidth: true,
+                                htmlLabels: true
+                            }
+                        });
+                        
+                        // 手动渲染每个图表
+                        mermaid.run();
+                        
+                        console.log('Mermaid diagrams rendered successfully');
+                    } catch (error) {
+                        console.error('Mermaid rendering error:', error);
+                        showFallbackDiagrams();
+                    }
+                } else {
+                    console.error('Mermaid library not loaded');
+                    showFallbackDiagrams();
+                }
+            }, 1000);
+        });
+        
+        // 备用方案：显示文字描述
+        function showFallbackDiagrams() {
+            document.querySelectorAll('.mermaid').forEach(function(element) {
+                element.innerHTML = `
+                    <div style="padding: 40px; background: #fff3cd; border-radius: 8px; text-align: left;">
+                        <h4 style="color: #856404; margin-bottom: 15px;">📊 架构图表</h4>
+                        <p style="color: #856404; line-height: 1.6;">
+                            <strong>系统架构层次：</strong><br>
+                            用户层 → 前端层 → API网关层 → 后端微服务层 → 数据存储层<br><br>
+                            
+                            <strong>核心微服务：</strong><br>
+                            • VnPy核心服务 (:8006) - 主交易引擎<br>
+                            • 用户交易服务 (:8001) - 认证和风控<br>
+                            • 策略数据服务 (:8002) - 数据和回测<br>
+                            • 网关适配服务 (:8004) - CTP接口<br>
+                            • 监控通知服务 (:8005) - 系统监控<br><br>
+                            
+                            <strong>数据库：</strong> MySQL (主) + Redis (缓存) + InfluxDB (时序) + MongoDB (文档)
+                        </p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

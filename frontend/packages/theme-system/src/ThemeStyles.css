@@ -1,0 +1,356 @@
+/* ==============================================
+   RedFire 黑白灰三色主题系统
+   支持浅色、深色、灰色三种主题
+   ============================================== */
+
+/* CSS变量定义 - 默认浅色主题 */
+:root {
+  /* 颜色变量 */
+  --color-primary: #2D2D2D;
+  --color-secondary: #6B7280;
+  --color-success: #2D2D2D;
+  --color-warning: #6B7280;
+  --color-error: #2D2D2D;
+  --color-background: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-text: #2D2D2D;
+  --color-border: #E5E7EB;
+  --color-hover: #F9FAFB;
+  --color-active: #E5E7EB;
+  --color-muted: #9CA3AF;
+  --color-cardBg: #FFFFFF;
+  --color-headerBg: #FFFFFF;
+  --color-sidebarBg: #2D2D2D;
+  
+  /* 间距变量 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* 字体变量 */
+  --font-size-h1: 2.25rem;
+  --font-size-h2: 1.875rem;
+  --font-size-h3: 1.5rem;
+  --font-size-h4: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  
+  /* 阴影变量 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  /* 过渡变量 */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* 深色主题 */
+[data-theme="dark"] {
+  --color-primary: #E5E7EB;
+  --color-secondary: #9CA3AF;
+  --color-success: #E5E7EB;
+  --color-warning: #9CA3AF;
+  --color-error: #E5E7EB;
+  --color-background: #000000;
+  --color-surface: #2D2D2D;
+  --color-text: #F9FAFB;
+  --color-border: #6B7280;
+  --color-hover: #2D2D2D;
+  --color-active: #6B7280;
+  --color-muted: #6B7280;
+  --color-cardBg: #2D2D2D;
+  --color-headerBg: #000000;
+  --color-sidebarBg: #000000;
+  
+  /* 深色主题阴影 */
+  --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.05);
+  --shadow-md: 0 4px 6px rgba(255, 255, 255, 0.07);
+  --shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.1);
+  --shadow-xl: 0 20px 25px rgba(255, 255, 255, 0.1);
+}
+
+/* 灰色主题 */
+[data-theme="gray"] {
+  --color-primary: #2D2D2D;
+  --color-secondary: #6B7280;
+  --color-success: #2D2D2D;
+  --color-warning: #6B7280;
+  --color-error: #2D2D2D;
+  --color-background: #F9FAFB;
+  --color-surface: #E5E7EB;
+  --color-text: #2D2D2D;
+  --color-border: #9CA3AF;
+  --color-hover: #E5E7EB;
+  --color-active: #9CA3AF;
+  --color-muted: #6B7280;
+  --color-cardBg: #E5E7EB;
+  --color-headerBg: #F9FAFB;
+  --color-sidebarBg: #6B7280;
+  
+  /* 灰色主题阴影 */
+  --shadow-sm: 0 1px 2px rgba(45, 45, 45, 0.08);
+  --shadow-md: 0 4px 6px rgba(45, 45, 45, 0.1);
+  --shadow-lg: 0 10px 15px rgba(45, 45, 45, 0.12);
+  --shadow-xl: 0 20px 25px rgba(45, 45, 45, 0.15);
+}
+
+/* ==============================================
+   全局基础样式
+   ============================================== */
+
+/* 文档根元素 */
+html {
+  transition: background-color var(--transition-normal);
+}
+
+/* 页面主体 */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+
+/* 应用根容器 */
+#root {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  transition: background-color var(--transition-normal);
+}
+
+/* ==============================================
+   主题切换按钮
+   ============================================== */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-body);
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-hover);
+  border-color: var(--color-active);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle:active {
+  background-color: var(--color-active);
+  transform: translateY(0);
+}
+
+.theme-toggle .theme-icon {
+  font-size: 1.2em;
+  min-width: 20px;
+  text-align: center;
+}
+
+.theme-toggle .theme-text {
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 小屏幕隐藏文字 */
+@media (max-width: 768px) {
+  .theme-toggle .theme-text {
+    display: none;
+  }
+}
+
+/* ==============================================
+   通用组件样式
+   ============================================== */
+
+/* 卡片 */
+.card, .ant-card {
+  background-color: var(--color-cardBg) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.card:hover, .ant-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* 头部 */
+.header, .app-header, .ant-layout-header {
+  background-color: var(--color-headerBg) !important;
+  border-bottom-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+  transition: all var(--transition-normal);
+}
+
+/* 侧边栏 */
+.sidebar, .app-sider, .ant-layout-sider {
+  background-color: var(--color-sidebarBg) !important;
+  transition: all var(--transition-normal);
+}
+
+/* 侧边栏文字 */
+.sidebar .logo-text,
+.app-sider .logo-text {
+  color: var(--color-background) !important;
+}
+
+/* 表面元素 */
+.surface {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  transition: all var(--transition-normal);
+}
+
+/* 文本颜色 */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-muted { color: var(--color-muted); }
+
+/* 边框颜色 */
+.border { border-color: var(--color-border); }
+.border-primary { border-color: var(--color-primary); }
+
+/* 背景颜色 */
+.bg-surface { background-color: var(--color-surface); }
+.bg-hover { background-color: var(--color-hover); }
+.bg-card { background-color: var(--color-cardBg); }
+
+/* ==============================================
+   Ant Design组件主题适配
+   ============================================== */
+
+/* 重写Ant Design颜色 */
+.ant-btn {
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.ant-btn:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-hover);
+  color: var(--color-primary);
+}
+
+.ant-btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+.ant-btn-primary:hover {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+/* 输入框 */
+.ant-input, .ant-select-selector {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.ant-input:hover, .ant-select-selector:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.ant-input:focus, .ant-select-focused .ant-select-selector {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(45, 45, 45, 0.1) !important;
+}
+
+/* 表格 */
+.ant-table {
+  background-color: var(--color-cardBg) !important;
+  color: var(--color-text) !important;
+}
+
+.ant-table-thead > tr > th {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: var(--color-hover) !important;
+}
+
+/* 菜单 */
+.ant-menu {
+  background-color: transparent !important;
+  color: var(--color-text) !important;
+}
+
+.ant-menu-item {
+  color: var(--color-text) !important;
+}
+
+.ant-menu-item:hover {
+  background-color: var(--color-hover) !important;
+}
+
+.ant-menu-item-selected {
+  background-color: var(--color-active) !important;
+  color: var(--color-primary) !important;
+}
+
+/* ==============================================
+   响应式和动画优化
+   ============================================== */
+
+/* 减少动画 - 尊重用户偏好 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式适配 */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #000000;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  [data-theme="dark"] {
+    --color-border: #FFFFFF;
+    --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.3);
+    --shadow-md: 0 4px 6px rgba(255, 255, 255, 0.3);
+    --shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 打印样式 */
+@media print {
+  * {
+    background-color: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@2.3.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "redfire/redfire"
+    }
+  ],
+  "commit": true,
+  "fixed": [
+    [
+      "@redfire/ui-components",
+      "@redfire/theme-system",
+      "@redfire/shared-types",
+      "@redfire/api-client"
+    ]
+  ],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "web-app",
+    "mobile-app", 
+    "admin-dashboard",
+    "trading-terminal"
+  ],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
+}

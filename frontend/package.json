@@ -1,0 +1,107 @@
+{
+  "name": "redfire-frontend",
+  "version": "2.0.0",
+  "description": "RedFire量化交易平台前端 - 统一现代化架构",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "npm install && turbo run build --filter=@redfire/* && turbo run generate",
+    "dev": "turbo run dev --parallel",
+    "dev:web": "turbo run dev --filter=web-app",
+    "dev:mobile": "turbo run dev --filter=mobile-app", 
+    "dev:admin": "turbo run dev --filter=admin-dashboard",
+    "dev:terminal": "turbo run dev --filter=trading-terminal",
+    "dev:packages": "turbo run dev --filter=@redfire/*",
+    "build": "turbo run build",
+    "build:affected": "turbo run build --filter=...[HEAD^]",
+    "build:web": "turbo run build --filter=web-app",
+    "build:mobile": "turbo run build --filter=mobile-app",
+    "build:admin": "turbo run build --filter=admin-dashboard", 
+    "build:terminal": "turbo run build --filter=trading-terminal",
+    "build:packages": "turbo run build --filter=@redfire/*",
+    "build:apps": "turbo run build --filter=./apps/*",
+    "test": "turbo run test --parallel",
+    "test:affected": "turbo run test --filter=...[HEAD^]",
+    "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint --parallel",
+    "lint:affected": "turbo run lint --filter=...[HEAD^]",
+    "lint:fix": "turbo run lint:fix --parallel",
+    "type-check": "turbo run type-check --parallel",
+    "format": "turbo run format --parallel",
+    "format:check": "turbo run format:check --parallel",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "clean:dist": "turbo run clean",
+    "clean:cache": "rm -rf .turbo",
+    "clean:deps": "rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "preview": "turbo run preview",
+    "analyze": "turbo run analyze",
+    "storybook": "turbo run storybook",
+    "build-storybook": "turbo run build-storybook",
+    "generate": "turbo run generate",
+    "docker:build": "turbo run docker:build",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=@redfire/* && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.8",
+    "@changesets/cli": "^2.26.2",
+    "@turbo/gen": "^1.10.16",
+    "@types/node": "^20.8.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
+    "turbo": "^1.10.16",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@9.8.1",
+  "keywords": [
+    "trading",
+    "quantitative",
+    "finance",
+    "react",
+    "typescript",
+    "monorepo",
+    "microfrontend"
+  ],
+  "author": "RedFire Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redfire/redfire.git",
+    "directory": "frontend"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}

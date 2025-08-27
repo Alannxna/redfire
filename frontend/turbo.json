@@ -1,0 +1,177 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": [
+    "**/.env.*local",
+    ".env",
+    "tsconfig.json",
+    "package.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "VERCEL_URL",
+    "CI",
+    "GITHUB_TOKEN"
+  ],
+  "pipeline": {
+    "//#setup": {
+      "cache": false,
+      "dependsOn": []
+    },
+    "generate": {
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build", "^generate"],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        "build/**",
+        "storybook-static/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "API_URL",
+        "WS_URL",
+        "APP_ENV",
+        "BUILD_ID",
+        "PUBLIC_URL"
+      ],
+      "inputs": [
+        "src/**",
+        "public/**",
+        "package.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        "next.config.js"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"],
+      "env": [
+        "NODE_ENV",
+        "API_URL", 
+        "WS_URL",
+        "PORT",
+        "HTTPS"
+      ]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "coverage/**",
+        "test-results/**",
+        ".nyc_output/**"
+      ],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
+        "__tests__/**/*.{ts,tsx,js,jsx}",
+        "jest.config.js",
+        "vitest.config.ts"
+      ],
+      "env": ["NODE_ENV", "CI"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build", "^build"],
+      "outputs": ["test-results/**", "playwright-report/**"],
+      "env": ["NODE_ENV", "CI", "BASE_URL"]
+    },
+    "lint": {
+      "outputs": [".eslintcache"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        ".eslintrc.*",
+        "eslint.config.*",
+        "package.json"
+      ]
+    },
+    "lint:fix": {
+      "outputs": [".eslintcache"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        ".eslintrc.*", 
+        "eslint.config.*",
+        "package.json"
+      ]
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": ["**/*.tsbuildinfo"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json"
+      ]
+    },
+    "format": {
+      "outputs": [],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx,json,md}",
+        ".prettierrc*",
+        "prettier.config.*"
+      ]
+    },
+    "format:check": {
+      "outputs": [],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx,json,md}",
+        ".prettierrc*",
+        "prettier.config.*"
+      ]
+    },
+    "clean": {
+      "cache": false
+    },
+    "preview": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "analyze": {
+      "dependsOn": ["build"],
+      "outputs": ["analyze/**", "bundle-analyzer/**"],
+      "env": ["NODE_ENV"]
+    },
+    "storybook": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
+    },
+    "docker:build": {
+      "dependsOn": ["build"],
+      "outputs": [],
+      "cache": false
+    }
+  },
+  "remoteCache": {
+    "enabled": true,
+    "signature": true
+  },
+  "cacheDir": ".turbo",
+  "experimentalSpaces": {
+    "id": "redfire-frontend"
+  }
+}

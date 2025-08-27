@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedFire系统架构讨论文档</title>
+    <!-- 多个CDN源确保加载成功 -->
+    <script src="https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // 备用CDN加载
+        if (typeof mermaid === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js';
+            document.head.appendChild(script);
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin: -20px -20px 40px -20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .meta-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .meta-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            margin-top: 25px;
+        }
+        
+        .section h4 {
+            color: #495057;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+        
+        .architecture-layer {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .architecture-layer h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .service-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .service-card h5 {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .service-card .port {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tech-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .tech-item h5 {
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .diagram-title {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .mermaid {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #e17055;
+        }
+        
+        .highlight-box h4 {
+            color: #d63031;
+            margin-bottom: 10px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #28a745;
+        }
+        
+        .feature-item h5 {
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+        }
+        
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .toc a:hover {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 RedFire量化交易系统</h1>
+            <p class="subtitle">系统架构详解与技术讨论文档</p>
+        </div>
+
+        <div class="meta-info">
+            <h3>📋 文档信息</h3>
+            <p><strong>生成时间:</strong> 2024年12月19日</p>
+            <p><strong>讨论主题:</strong> RedFire系统整体架构分析</p>
+            <p><strong>数据库确认:</strong> MySQL数据库配置</p>
+            <p><strong>涵盖内容:</strong> 前端架构、后端微服务、数据库配置、技术栈选型</p>
+        </div>
+
+        <div class="toc">
+            <h3>📚 目录导航</h3>
+            <ul>
+                <li><a href="#overview">系统概览</a></li>
+                <li><a href="#architecture-layers">架构层次</a></li>
+                <li><a href="#frontend-arch">前端架构</a></li>
+                <li><a href="#backend-arch">后端架构</a></li>
+                <li><a href="#database-config">数据库配置</a></li>
+                <li><a href="#diagrams">架构图表</a></li>
+                <li><a href="#tech-stack">技术栈详解</a></li>
+                <li><a href="#features">核心特性</a></li>
+            </ul>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>🌟 系统概览</h2>
+            <p>RedFire是一个基于<strong>微服务架构</strong>的量化交易平台，采用<strong>DDD（领域驱动设计）</strong>思想，支持多种交易接口，具备完整的风险管理体系。</p>
+            
+            <div class="highlight-box">
+                <h4>🎯 核心特性</h4>
+                <ul>
+                    <li><strong>微服务架构:</strong> 服务独立部署，便于扩展</li>
+                    <li><strong>事件驱动:</strong> 异步处理，提高性能</li>
+                    <li><strong>DDD设计:</strong> 清晰的业务边界</li>
+                    <li><strong>高可用性:</strong> 服务冗余和故障转移</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="architecture-layers">
+            <h2>🏗️ 架构层次</h2>
+            
+            <div class="architecture-layer">
+                <h4>🌐 用户层 (User Layer)</h4>
+                <p>Web用户 + 移动用户 + 专业交易员 + 系统管理员</p>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>🎨 前端层 (Frontend Layer)</h4>
+                <p>Web应用 + 移动应用 + 管理后台 + 专业交易界面</p>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>🔌 API网关层 (Gateway Layer)</h4>
+                <p>FastAPI网关 + WebSocket服务 + 认证授权 + 负载均衡</p>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>⚙️ 后端层 (Backend Layer)</h4>
+                <p>主交易引擎 + 事件引擎 + 策略引擎 + 风险引擎 + 数据引擎</p>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>🗄️ 数据层 (Data Layer)</h4>
+                <p>MySQL + Redis + InfluxDB + MongoDB</p>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>🌍 外部接口层 (External Layer)</h4>
+                <p>CTP接口 + IB接口 + OKEX接口 + 市场数据源</p>
+            </div>
+        </div>
+
+        <div class="section" id="frontend-arch">
+            <h2>🎨 前端架构</h2>
+            
+            <h3>📦 Monorepo结构</h3>
+            <div class="code-block">
+frontend/
+├── 📂 apps/                    # 应用层
+│   └── web-app/               # Web主应用 (React + TypeScript)
+├── 📂 packages/               # 共享包
+│   ├── ui-components/         # UI组件库
+│   ├── business-components/   # 业务组件库
+│   ├── shared-types/          # 共享类型定义
+│   ├── api-client/            # API客户端
+│   └── theme-system/          # 主题系统
+├── 📂 shared/                 # 共享资源
+├── 📂 tools/                  # 开发工具
+└── 📂 tests/                  # 测试代码
+            </div>
+
+            <h3>🔧 前端服务组成</h3>
+            <div class="service-card">
+                <h5>Web主应用 <span class="port">:3000</span></h5>
+                <p><strong>功能:</strong> 主要交易界面、用户管理、策略管理</p>
+                <p><strong>技术:</strong> React + TypeScript + Ant Design</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>UI组件库</h5>
+                <p><strong>功能:</strong> 可复用的UI组件</p>
+                <p><strong>技术:</strong> React + TypeScript + Styled Components</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>业务组件库</h5>
+                <p><strong>功能:</strong> 交易相关业务组件</p>
+                <p><strong>技术:</strong> React + TypeScript + 业务逻辑</p>
+            </div>
+        </div>
+
+        <div class="section" id="backend-arch">
+            <h2>⚙️ 后端架构</h2>
+            
+            <h3>🏗️ 微服务架构</h3>
+            <p>RedFire后端采用<strong>集成核心 + 辅助微服务</strong>的架构模式：</p>
+            
+            <div class="service-card">
+                <h5>🔥 VnPy集成核心服务 <span class="port">:8006</span></h5>
+                <p><strong>功能:</strong> VnPy引擎管理、事件处理、网关连接、市场数据、策略管理、Redis消息队列</p>
+                <p><strong>作用:</strong> 系统的核心交易引擎，负责策略执行、订单管理、实时数据处理</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>👤 用户交易服务 <span class="port">:8001</span></h5>
+                <p><strong>功能:</strong> 用户认证和授权、账户管理、订单交易、风险控制</p>
+                <p><strong>作用:</strong> 处理用户相关的所有业务逻辑，包括认证、交易、风控</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>📊 策略数据服务 <span class="port">:8002</span></h5>
+                <p><strong>功能:</strong> 策略管理、历史数据管理、回测分析、技术指标计算</p>
+                <p><strong>作用:</strong> 负责策略的创建、管理、回测以及历史数据的处理</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>🌐 网关适配服务 <span class="port">:8004</span></h5>
+                <p><strong>功能:</strong> CTP接口适配、协议格式转换、订单路由转发</p>
+                <p><strong>作用:</strong> 负责与外部交易接口的连接和协议转换</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>📱 监控通知服务 <span class="port">:8005</span></h5>
+                <p><strong>功能:</strong> 系统性能监控、服务健康检查、告警规则管理</p>
+                <p><strong>作用:</strong> 负责系统的监控、告警和通知功能</p>
+            </div>
+
+            <h3>🏛️ Clean Architecture分层</h3>
+            <div class="code-block">
+# 接口层 (Interface Layer)
+interfaces/
+├── rest/                    # REST API接口
+├── websocket/              # WebSocket接口
+└── grpc/                   # gRPC接口
+
+# 应用层 (Application Layer)  
+application/
+├── services/               # 应用服务
+├── commands/               # 命令处理器
+├── queries/                # 查询处理器
+└── events/                 # 事件处理器
+
+# 领域层 (Domain Layer)
+domain/
+├── trading/                # 交易领域
+├── strategy/               # 策略领域
+├── user/                   # 用户领域
+└── data/                   # 数据领域
+
+# 基础设施层 (Infrastructure Layer)
+infrastructure/
+├── database/               # 数据库访问
+├── cache/                  # 缓存管理
+├── messaging/              # 消息队列
+└── external/               # 外部服务
+            </div>
+        </div>
+
+        <div class="section" id="database-config">
+            <h2>🗄️ 数据库配置确认</h2>
+            
+            <div class="highlight-box">
+                <h4>✅ 确认结果</h4>
+                <p>根据配置文件检查，RedFire系统<strong>确实使用的是MySQL数据库</strong>。</p>
+            </div>
+
+            <h3>📋 MySQL配置信息</h3>
+            <div class="code-block">
+# 数据库类型
+DATABASE_TYPE = "mysql"
+DB_TYPE=mysql
+
+# MySQL连接配置
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=vnpy
+
+# 连接字符串格式
+mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4
+            </div>
+
+            <h3>📦 相关依赖</h3>
+            <div class="code-block">
+# requirements.txt 中的MySQL相关依赖
+sqlalchemy>=2.0.0        # ORM支持
+pymysql>=1.1.0           # MySQL连接器
+            </div>
+
+            <h3>🔧 连接池配置</h3>
+            <div class="code-block">
+# 数据库连接池参数
+DB_POOL_SIZE=10
+DB_MAX_OVERFLOW=20
+DB_POOL_TIMEOUT=30
+DB_POOL_RECYCLE=3600
+            </div>
+        </div>
+
+        <div class="section" id="diagrams">
+            <h2>📊 架构图表</h2>
+            
+            <div class="diagram-container">
+                <div class="diagram-title">🏗️ 系统整体架构图</div>
+                <div class="mermaid">
+graph TB
+    User["🌐 用户层<br/>Web用户 + 移动用户 + 专业交易员"] --> Frontend["🎨 前端层<br/>React + TypeScript + Ant Design"]
+    Frontend --> Gateway["🔌 API网关层<br/>FastAPI + WebSocket + 认证授权"]
+    Gateway --> Backend["⚙️ 后端层<br/>微服务架构 + 事件驱动"]
+    Backend --> Data["🗄️ 数据层<br/>MySQL + Redis + InfluxDB"]
+    Backend --> External["🌍 外部接口层<br/>CTP + IB + OKEX"]
+    
+    subgraph "Frontend Architecture"
+        WebApp["Web应用<br/>:3000"]
+        UILib["UI组件库"]
+        BizLib["业务组件库"] 
+        APIClient["API客户端"]
+    end
+    
+    subgraph "Backend Microservices"
+        VnpyCore["VnPy核心服务<br/>:8006<br/>🔥 主引擎"]
+        UserService["用户交易服务<br/>:8001<br/>👤 认证风控"]
+        DataService["策略数据服务<br/>:8002<br/>📊 数据回测"]
+        GatewayService["网关适配服务<br/>:8004<br/>🌐 CTP路由"]
+        MonitorService["监控通知服务<br/>:8005<br/>📱 监控告警"]
+    end
+    
+    subgraph "Data Storage"
+        MySQL["MySQL<br/>主数据库"]
+        Redis["Redis<br/>缓存队列"]
+        InfluxDB["InfluxDB<br/>时序数据"]
+        MongoDB["MongoDB<br/>文档存储"]
+    end
+    
+    Frontend --> WebApp
+    Frontend --> UILib
+    Frontend --> BizLib
+    Frontend --> APIClient
+    
+    Backend --> VnpyCore
+    Backend --> UserService
+    Backend --> DataService
+    Backend --> GatewayService
+    Backend --> MonitorService
+    
+    Data --> MySQL
+    Data --> Redis
+    Data --> InfluxDB
+    Data --> MongoDB
+    
+    VnpyCore -.-> UserService
+    VnpyCore -.-> DataService
+    VnpyCore -.-> GatewayService
+    VnpyCore -.-> MonitorService
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 数据流向图</div>
+                <div class="mermaid">
+graph LR
+    subgraph "数据流向图"
+        A["用户操作"] --> B["前端界面"]
+        B --> C["API网关"]
+        C --> D["后端服务"]
+        D --> E["数据存储"]
+        
+        F["市场数据"] --> G["数据引擎"]
+        G --> H["事件引擎"]
+        H --> I["策略引擎"]
+        I --> J["交易执行"]
+        
+        K["外部接口"] --> L["网关接口"]
+        L --> M["交易引擎"]
+        M --> N["风险控制"]
+        N --> O["结果反馈"]
+    end
+    
+    subgraph "实时数据流"
+        P["WebSocket"] --> Q["实时推送"]
+        Q --> R["前端更新"]
+        R --> S["用户界面"]
+        S --> T["交易反馈"]
+    end
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🏛️ Clean Architecture分层架构</div>
+                <div class="mermaid">
+graph TB
+    subgraph "Clean Architecture - 分层架构"
+        Interface["🔌 接口层<br/>REST API + WebSocket + gRPC"]
+        Application["📱 应用层<br/>服务 + 命令 + 查询 + 事件"]
+        Domain["🏛️ 领域层<br/>交易 + 策略 + 用户 + 数据"]
+        Infrastructure["🏗️ 基础设施层<br/>数据库 + 缓存 + 消息 + 监控"]
+    end
+    
+    Interface --> Application
+    Application --> Domain
+    Application --> Infrastructure
+    Domain --> Infrastructure
+    
+    subgraph "DDD领域模型"
+        Trading["交易领域<br/>订单 + 持仓 + 成交"]
+        Strategy["策略领域<br/>策略 + 回测 + 执行"]
+        User["用户领域<br/>认证 + 权限 + 账户"]
+        DataDomain["数据领域<br/>市场 + 历史 + 指标"]
+        Risk["风险领域<br/>风控 + 限额 + 监控"]
+    end
+    
+    Domain --> Trading
+    Domain --> Strategy
+    Domain --> User
+    Domain --> DataDomain
+    Domain --> Risk
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="tech-stack">
+            <h2>🔧 技术栈详解</h2>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <h5>前端技术栈</h5>
+                    <ul>
+                        <li>React 18 + TypeScript</li>
+                        <li>Ant Design</li>
+                        <li>Redux Toolkit + Zustand</li>
+                        <li>Vite + Turborepo</li>
+                    </ul>
+                </div>
+                
+                <div class="tech-item">
+                    <h5>后端技术栈</h5>
+                    <ul>
+                        <li>Python 3.9+</li>
+                        <li>FastAPI</li>
+                        <li>asyncio + aiohttp</li>
+                        <li>SQLAlchemy + PyMySQL</li>
+                    </ul>
+                </div>
+                
+                <div class="tech-item">
+                    <h5>数据库技术栈</h5>
+                    <ul>
+                        <li>MySQL (主数据库)</li>
+                        <li>Redis (缓存队列)</li>
+                        <li>InfluxDB (时序数据)</li>
+                        <li>MongoDB (文档存储)</li>
+                    </ul>
+                </div>
+                
+                <div class="tech-item">
+                    <h5>运维技术栈</h5>
+                    <ul>
+                        <li>Docker + Kubernetes</li>
+                        <li>Prometheus + Grafana</li>
+                        <li>ELK Stack</li>
+                        <li>GitHub Actions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="features">
+            <h2>🌟 核心特性</h2>
+            
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h5>✅ 高可用性</h5>
+                    <p>微服务架构，服务独立部署</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h5>⚡ 高性能</h5>
+                    <p>异步事件处理，Redis缓存优化</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h5>🔧 可扩展性</h5>
+                    <p>插件化架构，水平扩展支持</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h5>🔒 安全性</h5>
+                    <p>多层安全防护，数据加密传输</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h5>📊 监控体系</h5>
+                    <p>应用性能监控，实时告警通知</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h5>🏗️ DDD设计</h5>
+                    <p>领域驱动设计，清晰业务边界</p>
+                </div>
+            </div>
+
+            <h3>🚀 部署架构</h3>
+            <div class="service-card">
+                <h5>🏠 开发环境</h5>
+                <p>单机部署，Docker Compose管理服务，本地数据库</p>
+            </div>
+            
+            <div class="service-card">
+                <h5>☁️ 生产环境</h5>
+                <p>Kubernetes集群部署，负载均衡，数据库集群</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📄 本文档由AI助手生成，包含RedFire系统架构的完整讨论内容</p>
+            <p>🕐 生成时间: 2024年12月19日 | 📍 项目路径: D:\HubGit\redfire</p>
+            <p>💡 如需更新或补充内容，请联系开发团队</p>
+        </div>
+    </div>
+
+    <script>
+        // 等待页面完全加载
+        window.addEventListener('load', function() {
+            // 多次尝试初始化
+            let attempts = 0;
+            const maxAttempts = 5;
+            
+            function initializeMermaid() {
+                attempts++;
+                
+                if (typeof mermaid !== 'undefined') {
+                    try {
+                        // 使用稳定的配置
+                        mermaid.initialize({
+                            startOnLoad: false,
+                            theme: 'default',
+                            securityLevel: 'loose',
+                            themeVariables: {
+                                primaryColor: '#667eea',
+                                primaryTextColor: '#333333',
+                                primaryBorderColor: '#764ba2',
+                                lineColor: '#495057'
+                            },
+                            flowchart: {
+                                useMaxWidth: true,
+                                htmlLabels: true
+                            }
+                        });
+                        
+                        // 手动渲染
+                        mermaid.run();
+                        console.log('Mermaid diagrams rendered successfully');
+                        
+                    } catch (error) {
+                        console.error('Mermaid rendering error:', error);
+                        if (attempts < maxAttempts) {
+                            setTimeout(initializeMermaid, 1000);
+                        } else {
+                            showFallbackDiagrams();
+                        }
+                    }
+                } else if (attempts < maxAttempts) {
+                    // 等待脚本加载
+                    setTimeout(initializeMermaid, 500);
+                } else {
+                    console.error('Mermaid library failed to load after multiple attempts');
+                    showFallbackDiagrams();
+                }
+            }
+            
+            // 显示备用图表
+            function showFallbackDiagrams() {
+                document.querySelectorAll('.mermaid').forEach(function(element, index) {
+                    const fallbackContent = [
+                        // 第一个图表的备用内容
+                        `<div style="padding: 30px; background: #e8f5e8; border-radius: 8px; text-align: left; border: 2px solid #28a745;">
+                            <h4 style="color: #155724; margin-bottom: 20px; text-align: center;">🏗️ RedFire系统整体架构</h4>
+                            <div style="font-family: monospace; line-height: 1.8; color: #155724;">
+                                <strong>🌐 用户层:</strong> Web用户 + 移动用户 + 专业交易员<br>
+                                <strong>🎨 前端层:</strong> React + TypeScript + Ant Design (:3000)<br>
+                                <strong>🔌 网关层:</strong> FastAPI + WebSocket + 认证授权<br>
+                                <strong>⚙️ 后端层:</strong> 微服务架构 + 事件驱动<br>
+                                &nbsp;&nbsp;• VnPy核心服务 (:8006) - 主交易引擎<br>
+                                &nbsp;&nbsp;• 用户交易服务 (:8001) - 认证风控<br>
+                                &nbsp;&nbsp;• 策略数据服务 (:8002) - 数据回测<br>
+                                &nbsp;&nbsp;• 网关适配服务 (:8004) - CTP接口<br>
+                                &nbsp;&nbsp;• 监控通知服务 (:8005) - 系统监控<br>
+                                <strong>🗄️ 数据层:</strong> MySQL + Redis + InfluxDB + MongoDB<br>
+                                <strong>🌍 外部层:</strong> CTP + IB + OKEX + 市场数据源
+                            </div>
+                        </div>`,
+                        
+                        // 第二个图表的备用内容
+                        `<div style="padding: 30px; background: #e3f2fd; border-radius: 8px; text-align: left; border: 2px solid #1976d2;">
+                            <h4 style="color: #0d47a1; margin-bottom: 20px; text-align: center;">🔄 数据流向示意</h4>
+                            <div style="font-family: monospace; line-height: 1.8; color: #0d47a1;">
+                                <strong>用户操作流:</strong><br>
+                                用户操作 → 前端界面 → API网关 → 后端服务 → 数据存储<br><br>
+                                <strong>市场数据流:</strong><br>
+                                市场数据 → 数据引擎 → 事件引擎 → 策略引擎 → 交易执行<br><br>
+                                <strong>外部接口流:</strong><br>
+                                外部接口 → 网关接口 → 交易引擎 → 风险控制 → 结果反馈<br><br>
+                                <strong>实时推送流:</strong><br>
+                                WebSocket → 实时推送 → 前端更新 → 用户界面
+                            </div>
+                        </div>`,
+                        
+                        // 第三个图表的备用内容
+                        `<div style="padding: 30px; background: #f3e5f5; border-radius: 8px; text-align: left; border: 2px solid #7b1fa2;">
+                            <h4 style="color: #4a148c; margin-bottom: 20px; text-align: center;">🏛️ Clean Architecture分层</h4>
+                            <div style="font-family: monospace; line-height: 1.8; color: #4a148c;">
+                                <strong>🔌 接口层 (Interface Layer):</strong><br>
+                                &nbsp;&nbsp;REST API + WebSocket + gRPC<br><br>
+                                <strong>📱 应用层 (Application Layer):</strong><br>
+                                &nbsp;&nbsp;服务 + 命令 + 查询 + 事件处理器<br><br>
+                                <strong>🏛️ 领域层 (Domain Layer):</strong><br>
+                                &nbsp;&nbsp;交易领域 + 策略领域 + 用户领域 + 数据领域<br><br>
+                                <strong>🏗️ 基础设施层 (Infrastructure Layer):</strong><br>
+                                &nbsp;&nbsp;数据库 + 缓存 + 消息队列 + 外部服务
+                            </div>
+                        </div>`
+                    ];
+                    
+                    element.innerHTML = fallbackContent[index] || fallbackContent[0];
+                });
+            }
+            
+            // 开始初始化
+            setTimeout(initializeMermaid, 500);
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 添加页面加载动画
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-in-out';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

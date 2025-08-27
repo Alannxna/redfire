@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VnPy 服务监控仪表盘</title>
+    <link rel="icon" type="image/svg+xml" href="/dashboard/static/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d3561 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #b8c3d9;
+            font-size: 1.1rem;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .overview-card h3 {
+            font-size: 0.9rem;
+            color: #b8c3d9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .overview-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .overview-card.services .value {
+            color: #10b981;
+        }
+
+        .overview-card.cpu .value {
+            color: #667eea;
+        }
+
+        .overview-card.memory .value {
+            color: #f59e0b;
+        }
+
+        .overview-card.disk .value {
+            color: #ef4444;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .services-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--status-color);
+        }
+
+        .service-card.online::before {
+            --status-color: #10b981;
+        }
+
+        .service-card.partial::before {
+            --status-color: #f59e0b;
+        }
+
+        .service-card.offline::before {
+            --status-color: #ef4444;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .service-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .service-status.online {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .service-status.partial {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .service-status.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .service-info {
+            color: #b8c3d9;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .service-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .service-port {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .type-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+            color: #d1d5db;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .system-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric {
+            margin-bottom: 20px;
+        }
+
+        .metric:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #b8c3d9;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .refresh-button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .refresh-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #b8c3d9;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            color: #fca5a5;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading .status-dot {
+            animation: pulse 1.5s infinite;
+        }
+
+        .health-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .health-indicator.healthy {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .health-indicator.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .health-indicator.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 VnPy 服务监控仪表盘</h1>
+            <p>实时监控所有微服务状态 - 基于 DDD 架构</p>
+            <div id="system-health" class="health-indicator healthy" style="margin-top: 15px;">
+                <div class="status-dot"></div>
+                <span>系统健康</span>
+            </div>
+        </div>
+
+        <!-- 概览面板 -->
+        <div class="overview-grid">
+            <div class="overview-card services">
+                <h3>在线服务</h3>
+                <div class="value" id="online-services">-</div>
+                <div style="font-size: 0.8rem; color: #9ca3af;">/ <span id="total-services">-</span> 总计</div>
+            </div>
+            <div class="overview-card cpu">
+                <h3>CPU 使用率</h3>
+                <div class="value" id="cpu-usage">-</div>
+            </div>
+            <div class="overview-card memory">
+                <h3>内存使用率</h3>
+                <div class="value" id="memory-usage">-</div>
+            </div>
+            <div class="overview-card disk">
+                <h3>磁盘使用率</h3>
+                <div class="value" id="disk-usage">-</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="services-section">
+                <h2 class="section-title">
+                    🛠️ 服务状态
+                    <span id="service-count" style="font-size: 0.9rem; color: #b8c3d9;"></span>
+                </h2>
+                <div id="services-container">
+                    <div class="loading">
+                        <div class="status-dot" style="width: 16px; height: 16px; margin: 0 auto 10px;"></div>
+                        <p>正在加载服务状态...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="system-info">
+                    <h3 class="section-title">📊 系统信息</h3>
+                    <div id="system-container">
+                        <div class="loading">
+                            <div class="status-dot" style="width: 12px; height: 12px; margin: 0 auto 8px;"></div>
+                            <p>加载中...</p>
+                        </div>
+                    </div>
+                    <button class="refresh-button" onclick="refreshData()">
+                        🔄 刷新数据
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated" id="last-updated">
+            最后更新: 从未
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+
+        function formatBytes(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            let size = bytes;
+            let unitIndex = 0;
+            
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+            
+            return `${size.toFixed(1)} ${units[unitIndex]}`;
+        }
+
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / (3600 * 24));
+            const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (days > 0) {
+                return `${days}天 ${hours}小时`;
+            } else if (hours > 0) {
+                return `${hours}小时 ${minutes}分钟`;
+            } else {
+                return `${minutes}分钟`;
+            }
+        }
+
+        function updateOverview(overview) {
+            document.getElementById('online-services').textContent = overview.online_services;
+            document.getElementById('total-services').textContent = overview.total_services;
+            document.getElementById('cpu-usage').textContent = `${overview.cpu_usage.toFixed(1)}%`;
+            document.getElementById('memory-usage').textContent = `${overview.memory_usage.toFixed(1)}%`;
+            document.getElementById('disk-usage').textContent = `${overview.disk_usage.toFixed(1)}%`;
+
+            // 更新系统健康状态
+            const healthIndicator = document.getElementById('system-health');
+            healthIndicator.className = `health-indicator ${overview.system_health}`;
+            
+            const healthText = {
+                'healthy': '系统健康',
+                'warning': '系统警告',
+                'critical': '系统异常',
+                'unknown': '状态未知'
+            };
+            
+            healthIndicator.querySelector('span').textContent = healthText[overview.system_health] || '状态未知';
+        }
+
+        function renderServices(services) {
+            const container = document.getElementById('services-container');
+            const serviceCount = document.getElementById('service-count');
+            
+            if (!services || services.length === 0) {
+                container.innerHTML = '<div class="error">无法获取服务状态数据</div>';
+                return;
+            }
+
+            const onlineCount = services.filter(s => s.status === 'online').length;
+            const totalCount = services.length;
+            serviceCount.textContent = `(${onlineCount}/${totalCount} 在线)`;
+
+            const servicesHtml = services.map(service => `
+                <div class="service-card ${service.status}">
+                    <div class="service-header">
+                        <div>
+                            <div class="service-name">${service.name}</div>
+                            <div class="type-badge">${service.type}</div>
+                        </div>
+                        <div class="service-status ${service.status}">
+                            <div class="status-dot"></div>
+                            ${service.status === 'online' ? '在线' : 
+                              service.status === 'partial' ? '部分' : '离线'}
+                        </div>
+                    </div>
+                    <div class="service-info">${service.description}</div>
+                    <div class="service-details">
+                        <span class="service-port">:${service.port}</span>
+                        <span>端口${service.port_active ? '已开放' : '未开放'}</span>
+                    </div>
+                    ${service.health_details ? `
+                        <div style="margin-top: 10px; font-size: 0.8rem; color: #9ca3af;">
+                            健康检查: ${service.health_ok ? '✅ 通过' : '❌ 失败'}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="services-grid">${servicesHtml}</div>`;
+        }
+
+        function renderSystemInfo(systemInfo) {
+            const container = document.getElementById('system-container');
+            
+            if (!systemInfo || systemInfo.error) {
+                container.innerHTML = '<div class="error">无法获取系统信息</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="metric">
+                    <div class="metric-label">CPU 使用率</div>
+                    <div class="metric-value">${systemInfo.cpu_percent.toFixed(1)}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${systemInfo.cpu_percent}%"></div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">内存使用率</div>
+                    <div class="metric-value">${systemInfo.memory.percent.toFixed(1)}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${systemInfo.memory.percent}%"></div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 4px;">
+                        ${formatBytes(systemInfo.memory.used)} / ${formatBytes(systemInfo.memory.total)}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">磁盘使用率</div>
+                    <div class="metric-value">${systemInfo.disk.percent.toFixed(1)}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${systemInfo.disk.percent}%"></div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 4px;">
+                        ${formatBytes(systemInfo.disk.used)} / ${formatBytes(systemInfo.disk.total)}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">系统运行时间</div>
+                    <div class="metric-value">${formatUptime(systemInfo.uptime)}</div>
+                </div>
+            `;
+        }
+
+        async function fetchData() {
+            try {
+                const [overviewResponse, servicesResponse, systemResponse] = await Promise.all([
+                    fetch('/dashboard/api/overview'),
+                    fetch('/dashboard/api/services'),
+                    fetch('/dashboard/api/system')
+                ]);
+
+                const overview = await overviewResponse.json();
+                const services = await servicesResponse.json();
+                const systemInfo = await systemResponse.json();
+
+                updateOverview(overview);
+                renderServices(services);
+                renderSystemInfo(systemInfo);
+
+                document.getElementById('last-updated').textContent = 
+                    `最后更新: ${new Date().toLocaleString()}`;
+
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                document.getElementById('services-container').innerHTML = 
+                    '<div class="error">网络连接失败，请检查服务状态</div>';
+                document.getElementById('system-container').innerHTML = 
+                    '<div class="error">无法连接到服务器</div>';
+            }
+        }
+
+        function refreshData() {
+            fetchData();
+        }
+
+        function startAutoRefresh() {
+            // 立即获取一次数据
+            fetchData();
+            
+            // 每10秒自动刷新
+            refreshInterval = setInterval(fetchData, 10000);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        // 页面加载时启动自动刷新
+        document.addEventListener('DOMContentLoaded', startAutoRefresh);
+
+        // 页面卸载时停止自动刷新
+        window.addEventListener('beforeunload', stopAutoRefresh);
+
+        // 页面获得焦点时刷新数据
+        window.addEventListener('focus', fetchData);
+    </script>
+</body>
+</html>

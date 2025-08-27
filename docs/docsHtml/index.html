@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedFire系统文档中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin: -30px -30px 50px -30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+        
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .doc-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .doc-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .doc-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .doc-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .doc-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .doc-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            color: #666;
+        }
+        
+        .footer h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .docs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 RedFire文档中心</h1>
+            <p>量化交易系统架构与技术文档</p>
+        </div>
+
+        <div class="docs-grid">
+            <div class="doc-card">
+                <div class="doc-icon">🏗️</div>
+                <h2 class="doc-title">系统架构详解</h2>
+                <p class="doc-description">
+                    完整的RedFire系统架构分析，包括前端Monorepo结构、后端微服务架构、Clean Architecture分层设计，以及详细的技术栈说明和部署方案。包含交互式Mermaid图表。
+                </p>
+                <div style="margin-top: 15px;">
+                    <a href="redfire-architecture-discussion.html" class="doc-link">完整版文档</a>
+                    <a href="redfire-architecture-fixed.html" class="doc-link" style="margin-left: 10px; background: #28a745;">图表修复版</a>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon">🗄️</div>
+                <h2 class="doc-title">数据库配置确认</h2>
+                <p class="doc-description">
+                    MySQL数据库配置的详细确认文档，包含配置文件分析、连接参数设置、技术实现细节，以及在微服务架构中的角色定位。
+                </p>
+                <a href="database-confirmation.html" class="doc-link">查看数据库文档</a>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-icon">📋</div>
+                <h2 class="doc-title">架构图表简化版</h2>
+                <p class="doc-description">
+                    无需网络连接的简化版架构文档，使用ASCII图表和文字描述，确保在任何环境下都能正常显示系统架构和技术栈信息。
+                </p>
+                <a href="redfire-architecture-simple.html" class="doc-link">查看简化版</a>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📊 项目统计</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <div class="stat-label">微服务数量</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4</span>
+                    <div class="stat-label">数据库类型</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">6</span>
+                    <div class="stat-label">架构层次</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <div class="stat-label">前端应用</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 30px 0; border-left: 5px solid #28a745;">
+            <h3 style="color: #28a745; margin-bottom: 10px;">🚀 系统亮点</h3>
+            <ul style="color: #155724; line-height: 1.8;">
+                <li><strong>微服务架构:</strong> VnPy核心服务 + 4个辅助微服务</li>
+                <li><strong>前端Monorepo:</strong> React + TypeScript + Ant Design</li>
+                <li><strong>DDD设计:</strong> 清晰的业务领域划分</li>
+                <li><strong>MySQL数据库:</strong> 完整的配置和连接池优化</li>
+                <li><strong>事件驱动:</strong> 高性能异步处理架构</li>
+            </ul>
+        </div>
+
+        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 30px 0; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 10px;">💡 核心服务端口</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #dc3545;">VnPy核心:</strong> :8006
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #28a745;">用户交易:</strong> :8001
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #007bff;">策略数据:</strong> :8002
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #6f42c1;">网关适配:</strong> :8004
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #fd7e14;">监控通知:</strong> :8005
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <strong style="color: #20c997;">前端应用:</strong> :3000
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>🛠️ 技术栈概览</h3>
+            <p><strong>前端:</strong> React 18 + TypeScript + Ant Design + Vite + Turborepo</p>
+            <p><strong>后端:</strong> Python 3.9+ + FastAPI + SQLAlchemy + PyMySQL</p>
+            <p><strong>数据:</strong> MySQL + Redis + InfluxDB + MongoDB</p>
+            <p><strong>运维:</strong> Docker + Kubernetes + Prometheus + Grafana</p>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                <p>📅 <strong>文档生成时间:</strong> 2024年12月19日</p>
+                <p>📍 <strong>项目位置:</strong> D:\HubGit\redfire</p>
+                <p>👥 <strong>维护团队:</strong> RedFire开发团队</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加页面加载动画
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.doc-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // 添加点击统计
+        document.querySelectorAll('.doc-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.href.includes('#')) {
+                    e.preventDefault();
+                    alert('此文档正在准备中，敬请期待！');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

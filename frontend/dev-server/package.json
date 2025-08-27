@@ -1,0 +1,15 @@
+{
+  "name": "redfire-dev-server",
+  "version": "1.0.0",
+  "description": "RedFire开发环境模拟服务器",
+  "main": "api-server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.14.2"
+  },
+  "scripts": {
+    "api": "node api-server.js",
+    "ws": "node ws-server.js"
+  }
+}

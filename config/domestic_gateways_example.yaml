@@ -1,0 +1,100 @@
+# 国内券商网关配置示例
+# 这是一个完整的配置示例，展示如何配置vnpy_ctptest、vnpy_xtp、vnpy_oes三个接口
+
+# 启用的网关类型
+enabled_gateways:
+  - ctptest  # CTP测试/仿真环境
+  - xtp      # 中泰证券XTP极速交易 (生产环境可启用)
+  - oes      # 宽睿OES高性能交易 (生产环境可启用)
+
+# CTP测试/仿真配置
+ctptest_config:
+  enabled: true
+  # SimNow仿真账户配置
+  userid: "your_simnow_userid"           # SimNow仿真账号
+  password: "your_simnow_password"       # SimNow仿真密码
+  brokerid: "9999"                       # 期货公司代码(SimNow固定为9999)
+  appid: "simnow_client_test"            # 应用标识
+  auth_code: "0000000000000000"          # 认证码(SimNow可为空或固定值)
+  product_info: "simnow_md_test"         # 产品信息
+  
+  # SimNow服务器地址 (7*24小时环境)
+  td_address: "tcp://180.168.146.187:10101"  # 交易服务器
+  md_address: "tcp://180.168.146.187:10111"  # 行情服务器
+  
+  # 或者使用模拟环境地址
+  # td_address: "tcp://180.168.146.187:10130"
+  # md_address: "tcp://180.168.146.187:10131"
+  
+  environment: "simnow"                  # 环境类型: simnow/test/production
+
+# 中泰证券XTP配置
+xtp_config:
+  enabled: false  # 生产环境设置为true
+  # XTP账户配置
+  userid: "your_xtp_userid"              # XTP账号
+  password: "your_xtp_password"          # XTP密码
+  client_id: 1                           # 客户端ID
+  software_key: "your_software_key"      # 软件授权码
+  
+  # XTP服务器配置
+  quote_ip: "xxx.xxx.xxx.xxx"            # 行情服务器IP
+  quote_port: 6002                       # 行情服务器端口
+  trade_ip: "xxx.xxx.xxx.xxx"            # 交易服务器IP
+  trade_port: 6001                       # 交易服务器端口
+  
+  # 协议配置
+  quote_protocol: "TCP"                  # 行情协议 TCP/UDP
+  trade_protocol: "TCP"                  # 交易协议
+  
+  # 心跳配置
+  heartbeat_interval: 15                 # 心跳间隔(秒)
+
+# 宽睿OES配置
+oes_config:
+  enabled: false  # 生产环境设置为true
+  # OES账户配置
+  username: "your_oes_username"          # OES用户名
+  password: "your_oes_password"          # OES密码
+  
+  # 硬件信息(用于认证)
+  hdd_serial: "your_hdd_serial"          # 硬盘序列号
+  mac_address: "your_mac_address"        # MAC地址
+  ip_address: "your_client_ip"           # 客户端IP
+  
+  # OES服务器配置
+  ord_server: "tcp://xxx.xxx.xxx.xxx:xxxx"  # 委托服务器
+  rpt_server: "tcp://xxx.xxx.xxx.xxx:xxxx"  # 回报服务器
+  qry_server: "tcp://xxx.xxx.xxx.xxx:xxxx"  # 查询服务器
+  
+  mode: "PRODUCT"                        # 模式: PRODUCT/SIMULATION
+
+# 通用配置
+enable_auto_reconnect: true              # 启用自动重连
+reconnect_interval: 5                    # 重连间隔(秒)
+max_reconnect_attempts: 10               # 最大重连次数
+heartbeat_interval: 30                   # 心跳间隔(秒)
+
+# 性能配置
+order_timeout: 30                        # 订单超时时间(秒)
+query_timeout: 10                        # 查询超时时间(秒)
+max_concurrent_orders: 100               # 最大并发订单数
+
+# 监控配置
+enable_monitoring: true                  # 启用监控
+alert_on_disconnect: true                # 断开连接时告警
+alert_on_high_latency: true              # 高延迟时告警
+latency_threshold_ms: 100                # 延迟告警阈值(毫秒)
+
+# 开发环境特殊配置
+# 在开发环境中，建议：
+# 1. 只启用ctptest进行测试
+# 2. 设置较短的重连间隔用于快速测试
+# 3. 启用详细的监控和日志
+
+# 生产环境特殊配置
+# 在生产环境中，建议：
+# 1. 启用xtp和oes，禁用ctptest
+# 2. 设置适当的超时和重连参数
+# 3. 配置告警通知机制
+# 4. 定期备份配置文件

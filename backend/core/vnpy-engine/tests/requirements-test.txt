@@ -1,0 +1,57 @@
+# 测试框架核心
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.3.1
+
+# HTTP测试
+httpx==0.25.2
+requests==2.31.0
+responses==0.24.1
+
+# WebSocket测试  
+websockets==12.0
+websocket-client==1.6.4
+
+# 数据库测试
+pytest-postgresql==5.0.0
+pytest-alembic==0.10.7
+alembic==1.12.1
+sqlalchemy==2.0.23
+
+# 缓存测试
+fakeredis==2.20.1
+redis==5.0.1
+
+# 模拟和存根
+factory-boy==3.3.0
+faker==20.1.0
+freezegun==1.2.2
+
+# 性能测试
+locust==2.17.0
+memory-profiler==0.61.0
+psutil==5.9.6
+
+# API测试
+tavern==2.3.0
+
+# 安全测试
+bandit==1.7.5
+safety==2.3.5
+
+# 代码质量
+flake8==6.1.0
+black==23.11.0
+isort==5.12.0
+mypy==1.7.1
+
+# 报告生成
+pytest-html==4.1.1
+pytest-json-report==1.5.0
+allure-pytest==2.13.2
+
+# 开发工具
+ipdb==0.13.13
+pdbpp==0.10.3

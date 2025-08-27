@@ -1,0 +1,12 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# 依赖管理策略
+packageExtensions:
+  '@types/react':
+    peerDependencies:
+      react: '*'
+
+# 版本管理
+save-workspace-protocol: rolling
