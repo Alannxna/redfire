@@ -13,7 +13,7 @@ from enum import Enum
 from ..base.infrastructure_service import BaseInfrastructureService
 from ..common.exceptions import InfrastructureException
 from .dependency_container import DependencyContainer
-from .config_manager import ConfigManager
+from .config_manager import InfraConfigManager
 from .cache_manager import CacheManager  
 from .monitoring import MonitorService, MonitorServiceConfig
 from .logging import LogManager
@@ -66,7 +66,7 @@ class ServiceRegistry:
         # 注册配置管理器
         self.register_service(
             "config_manager", 
-            ConfigManager,
+            InfraConfigManager,
             priority=ServicePriority.CRITICAL,
             auto_start=True
         )

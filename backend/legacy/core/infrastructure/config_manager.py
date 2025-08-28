@@ -14,6 +14,25 @@ from enum import Enum
 
 from ..common.exceptions import InfrastructureException
 
+# 导入统一配置工具
+try:
+    from backend.shared.config.utils.config_utils import (
+        ConfigFileLoader,
+        ConfigEnvLoader,
+        ConfigTypeConverter,
+        ConfigMerger,
+        load_config_file,
+        load_env_config
+    )
+except ImportError:
+    # 降级处理，不影响现有功能
+    ConfigFileLoader = None
+    ConfigEnvLoader = None
+    ConfigTypeConverter = None
+    ConfigMerger = None
+    load_config_file = None
+    load_env_config = None
+
 
 class EnvironmentType(Enum):
     """环境类型枚举"""
@@ -32,7 +51,7 @@ class ConfigSource:
     enabled: bool = True
 
 
-class ConfigManager:
+class InfraConfigManager:
     """配置管理器
     
     统一管理应用配置，支持多种配置源和环境
@@ -118,6 +137,14 @@ class ConfigManager:
         if not path.exists():
             return {}
         
+        # 使用统一文件加载器 (如果可用)
+        if load_config_file:
+            try:
+                return load_config_file(path)
+            except Exception:
+                pass  # 降级到原始实现
+        
+        # 降级到原始实现
         with open(path, 'r', encoding='utf-8') as f:
             if path.suffix.lower() in ['.yaml', '.yml']:
                 return yaml.safe_load(f) or {}
@@ -128,9 +155,15 @@ class ConfigManager:
     
     def _load_from_environment(self) -> Dict[str, Any]:
         """从环境变量加载配置"""
-        config = {}
+        # 使用统一环境变量加载器 (如果可用)
+        if load_env_config:
+            try:
+                return load_env_config("VNPY_")
+            except Exception:
+                pass  # 降级到原始实现
         
-        # 加载以特定前缀开头的环境变量
+        # 降级到原始实现
+        config = {}
         prefix = "VNPY_"
         for key, value in os.environ.items():
             if key.startswith(prefix):
@@ -147,7 +180,14 @@ class ConfigManager:
     
     def _parse_env_value(self, value: str) -> Union[str, int, float, bool]:
         """解析环境变量值"""
-        # 尝试解析为不同类型
+        # 使用统一类型转换器 (如果可用)
+        if ConfigTypeConverter:
+            try:
+                return ConfigTypeConverter.convert_env_value(value)
+            except Exception:
+                pass  # 降级到原始实现
+        
+        # 降级到原始实现
         if value.lower() in ('true', 'false'):
             return value.lower() == 'true'
         
@@ -173,8 +213,15 @@ class ConfigManager:
     
     def _deep_merge(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         """深度合并配置字典"""
-        result = base.copy()
+        # 使用统一合并器 (如果可用)
+        if ConfigMerger:
+            try:
+                return ConfigMerger.deep_merge(base, override)
+            except Exception:
+                pass  # 降级到原始实现
         
+        # 降级到原始实现
+        result = base.copy()
         for key, value in override.items():
             if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                 result[key] = self._deep_merge(result[key], value)
@@ -253,19 +300,19 @@ class ConfigManager:
 
 
 # 全局配置管理器实例
-_global_config_manager: Optional[ConfigManager] = None
+_global_config_manager: Optional[InfraConfigManager] = None
 
 
-def get_config_manager() -> ConfigManager:
+def get_config_manager() -> InfraConfigManager:
     """获取全局配置管理器"""
     global _global_config_manager
     if _global_config_manager is None:
-        _global_config_manager = ConfigManager()
+        _global_config_manager = InfraConfigManager()
         _global_config_manager.load_config()
     return _global_config_manager
 
 
-def set_config_manager(config_manager: ConfigManager):
+def set_config_manager(config_manager: InfraConfigManager):
     """设置全局配置管理器"""
     global _global_config_manager
     _global_config_manager = config_manager

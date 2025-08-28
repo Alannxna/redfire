@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAuthEndpoint } from '../config/api';
 
@@ -10,11 +9,7 @@ interface LoginFormData {
   email?: string;
 }
 
-interface LoginPageProps {
-  onLogin: (username: string) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
     username: '',
     password: '',
@@ -24,8 +19,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  // const navigate = useNavigate(); // 不再需要手动导航，AuthContext会自动处理
-  const { login: authLogin } = useAuth();
+  const { login, loginDirect } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,7 +82,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           setError('注册失败，请检查网络连接');
         }
       } else {
-        // 登录逻辑
+        // 统一登录逻辑
         if (!formData.username || !formData.password) {
           setError('请输入用户名和密码');
           setIsLoading(false);
@@ -96,36 +90,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         }
         
         try {
-          // 使用AuthContext的统一登录方法
-          const success = await authLogin(formData.username, formData.password);
+          // 先尝试API登录
+          const apiSuccess = await login(formData.username, formData.password);
           
-          if (success) {
-            // AuthContext会自动设置认证状态，路由会自动重定向
+          if (apiSuccess) {
+            // API登录成功，AuthContext会自动处理状态和路由
             return;
-          } else {
-            // 如果API调用失败，回退到演示账户验证
-            if (formData.username === 'admin' && formData.password === 'admin123') {
-              // 手动设置演示用户状态
-              const demoUser = { id: '1', username: 'admin', email: 'admin@demo.com', role: 'admin' };
-              localStorage.setItem('redfire_token', 'demo-token-admin');
-              localStorage.setItem('redfire_user', JSON.stringify(demoUser));
-              onLogin(formData.username);
-            } else if (formData.username === 'trader' && formData.password === 'trader123') {
-              const demoUser = { id: '2', username: 'trader', email: 'trader@demo.com', role: 'trader' };
-              localStorage.setItem('redfire_token', 'demo-token-trader');
-              localStorage.setItem('redfire_user', JSON.stringify(demoUser));
-              onLogin(formData.username);
-            } else if (formData.username === 'demo' && formData.password === 'demo') {
-              const demoUser = { id: '3', username: 'demo', email: 'demo@demo.com', role: 'user' };
-              localStorage.setItem('redfire_token', 'demo-token-demo');
-              localStorage.setItem('redfire_user', JSON.stringify(demoUser));
-              onLogin(formData.username);
-            } else {
-              setError('登录失败，请检查用户名和密码');
-            }
           }
+          
+          // API登录失败，检查是否为演示账户
+          const demoAccounts = [
+            { username: 'admin', password: 'admin123' },
+            { username: 'trader', password: 'trader123' },
+            { username: 'demo', password: 'demo' }
+          ];
+          
+          const isDemoAccount = demoAccounts.some(
+            account => account.username === formData.username && account.password === formData.password
+          );
+          
+          if (isDemoAccount) {
+            // 使用演示账户登录
+            loginDirect(formData.username);
+            return;
+          }
+          
+          // 既不是API用户也不是演示账户
+          setError('登录失败，请检查用户名和密码');
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Login error:', error);
           setError('登录失败，请稍后重试');
         }

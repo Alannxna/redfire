@@ -5,7 +5,7 @@
 """
 
 from .dependency_container import DependencyContainer, ServiceScope
-from .config_manager import ConfigManager, get_config_manager, get_config
+from .config_manager import InfraConfigManager, get_config_manager, get_config
 from .cache_manager import CacheManager, get_cache_manager, cached
 from .monitoring import MonitorService, MonitorServiceConfig
 from .logging import LogManager, get_logger, configure_logging
@@ -17,7 +17,7 @@ __all__ = [
     "ServiceScope",
     
     # 配置管理
-    "ConfigManager",
+    "InfraConfigManager",
     "get_config_manager",
     "get_config",
     

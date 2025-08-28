@@ -7,17 +7,17 @@
 
 from .base_config import BaseConfig
 from .app_config import AppConfig
-from .config_manager import ConfigManager
+from .config_manager import CoreConfigManager
 from .environment_config import EnvironmentConfig, DevelopmentConfig, ProductionConfig
 
 # 全局配置管理器实例
 _config_manager = None
 
-def get_config_manager() -> ConfigManager:
+def get_config_manager() -> CoreConfigManager:
     """获取全局配置管理器实例"""
     global _config_manager
     if _config_manager is None:
-        _config_manager = ConfigManager()
+        _config_manager = CoreConfigManager()
     return _config_manager
 
 def get_app_config() -> AppConfig:
@@ -27,7 +27,7 @@ def get_app_config() -> AppConfig:
 __all__ = [
     'BaseConfig',
     'AppConfig', 
-    'ConfigManager',
+    'CoreConfigManager',
     'EnvironmentConfig',
     'DevelopmentConfig',
     'ProductionConfig',

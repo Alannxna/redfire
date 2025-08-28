@@ -17,7 +17,7 @@ from .environment_config import EnvironmentConfig, get_environment_config
 from .unified_config import UnifiedConfig
 
 
-class ConfigManager:
+class LegacyConfigManager:
     """配置管理器"""
     
     def __init__(self):
@@ -281,16 +281,16 @@ class ConfigManager:
 
 
 # 全局配置管理器实例
-_config_manager: Optional[ConfigManager] = None
+_config_manager: Optional[LegacyConfigManager] = None
 _config_lock = threading.RLock()
 
 
-def get_config_manager() -> ConfigManager:
+def get_config_manager() -> LegacyConfigManager:
     """获取配置管理器实例"""
     global _config_manager
     with _config_lock:
         if _config_manager is None:
-            _config_manager = ConfigManager()
+            _config_manager = LegacyConfigManager()
         return _config_manager
 
 

@@ -1,0 +1,40 @@
+app:
+  name: user_service
+  version: 1.0.0
+  environment: development
+  service_type: user
+  port: 8010
+
+config_service:
+  url: ${REDFIRE_CONFIG_SERVICE_URL:http://localhost:8001}
+  token: ${REDFIRE_CONFIG_SERVICE_TOKEN:redfire_config_token}
+  enabled: true
+  cache_ttl: 300
+
+database:
+  host: ${REDFIRE_USER_DB_HOST:localhost}
+  port: ${REDFIRE_USER_DB_PORT:5432}
+  name: ${REDFIRE_USER_DB_NAME:user_db}
+  user: ${REDFIRE_USER_DB_USER:user_user}
+  password: ${REDFIRE_USER_DB_PASSWORD:password}
+  pool_size: 20
+  max_overflow: 10
+
+redis:
+  host: ${REDFIRE_USER_REDIS_HOST:localhost}
+  port: ${REDFIRE_USER_REDIS_PORT:6379}
+  db: ${REDFIRE_USER_REDIS_DB:0}
+  password: ${REDFIRE_USER_REDIS_PASSWORD:}
+  pool_size: 10
+
+logging:
+  level: ${REDFIRE_USER_LOG_LEVEL:INFO}
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/user_service.log
+  max_size: 100MB
+  backup_count: 5
+
+monitoring:
+  metrics_enabled: true
+  health_check_path: /health
+  prometheus_port: ${REDFIRE_USER_METRICS_PORT:9091}

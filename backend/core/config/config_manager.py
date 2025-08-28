@@ -139,7 +139,7 @@ class ConfigHierarchy:
         return data
 
 
-class ConfigManager:
+class CoreConfigManager:
     """统一配置管理器"""
     
     def __init__(self):
@@ -308,14 +308,14 @@ class ConfigManager:
 
 
 # 全局配置管理器实例
-_config_manager: Optional[ConfigManager] = None
+_config_manager: Optional[CoreConfigManager] = None
 
 
-def get_config_manager() -> ConfigManager:
+def get_config_manager() -> CoreConfigManager:
     """获取全局配置管理器"""
     global _config_manager
     if _config_manager is None:
-        _config_manager = ConfigManager()
+        _config_manager = CoreConfigManager()
         
         # 自动加载环境配置
         try:

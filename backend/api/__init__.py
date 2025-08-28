@@ -3,8 +3,14 @@
 API路由模块
 """
 
-from .auth_routes import router as auth_router
+from .base import base_router
+from .auth import auth_router
+from .trading import order_router
+from .strategy import strategy_router
 
 __all__ = [
-    "auth_router"
+    "base_router",
+    "auth_router", 
+    "order_router",
+    "strategy_router"
 ]

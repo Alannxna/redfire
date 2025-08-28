@@ -1,0 +1,68 @@
+# MySQL Master 配置文件
+# ======================
+
+[mysqld]
+# 服务器ID (主从复制必需)
+server-id = 1
+
+# 二进制日志配置
+log-bin = mysql-bin
+binlog-format = ROW
+expire-logs-days = 7
+max-binlog-size = 100M
+
+# 字符集配置
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# 连接配置
+max-connections = 200
+max-connect-errors = 10
+wait-timeout = 28800
+interactive-timeout = 28800
+
+# 缓冲区配置
+innodb-buffer-pool-size = 256M
+innodb-log-file-size = 64M
+innodb-log-buffer-size = 16M
+key-buffer-size = 32M
+read-buffer-size = 2M
+read-rnd-buffer-size = 8M
+sort-buffer-size = 8M
+
+# 查询缓存配置
+query-cache-type = 1
+query-cache-size = 32M
+query-cache-limit = 2M
+
+# 线程配置
+thread-cache-size = 16
+thread-stack = 256K
+
+# 表配置
+table-open-cache = 1024
+table-definition-cache = 1024
+
+# 临时表配置
+tmp-table-size = 32M
+max-heap-table-size = 32M
+
+# 慢查询日志
+slow-query-log = 1
+slow-query-log-file = /var/log/mysql/slow.log
+long-query-time = 2
+
+# 错误日志
+log-error = /var/log/mysql/error.log
+
+# 通用日志 (开发环境可启用)
+# general-log = 1
+# general-log-file = /var/log/mysql/general.log
+
+# 安全配置
+sql-mode = STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+
+# InnoDB配置
+innodb-file-per-table = 1
+innodb-flush-log-at-trx-commit = 2
+innodb-flush-method = O_DIRECT

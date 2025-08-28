@@ -1,0 +1,53 @@
+# VnPy Docker 部署环境变量配置文件
+
+# ===============================
+# 数据库配置
+# ===============================
+POSTGRES_DB=vnpy_web
+POSTGRES_USER=vnpy
+POSTGRES_PASSWORD=your_secure_password_here
+
+# ===============================
+# Redis配置
+# ===============================
+REDIS_PASSWORD=your_redis_password_here
+
+# ===============================
+# 应用配置
+# ===============================
+DEBUG=false
+LOG_LEVEL=INFO
+
+# ===============================
+# 端口配置
+# ===============================
+HTTP_PORT=80
+HTTPS_PORT=443
+
+# ===============================
+# 前端API URLs（生产环境需要修改为实际域名）
+# ===============================
+FRONTEND_API_URL=http://your-domain.com/api/core
+FRONTEND_USER_API_URL=http://your-domain.com/api/user
+FRONTEND_WS_URL=ws://your-domain.com/api/core/ws
+
+# ===============================
+# 安全配置
+# ===============================
+SECRET_KEY=your_secret_key_here_change_in_production
+JWT_SECRET_KEY=your_jwt_secret_key_here
+
+# ===============================
+# 邮件配置（可选）
+# ===============================
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-email-password
+SMTP_TLS=true
+
+# ===============================
+# 监控配置（可选）
+# ===============================
+ENABLE_MONITORING=true
+ALERT_EMAIL=admin@your-domain.com

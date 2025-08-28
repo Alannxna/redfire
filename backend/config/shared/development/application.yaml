@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # 数据库服务
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: redfire
+      POSTGRES_USER: redfire
+      POSTGRES_PASSWORD: redfire123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - redfire-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - redfire-network
+
+  # 消息队列
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS,_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - redfire-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - redfire-network
+
+  # 微服务
+  trading-service:
+    build:
+      context: ./apps/trading-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://redfire:redfire123@postgres:5432/redfire
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - redfire-network
+
+  strategy-service:
+    build:
+      context: ./apps/strategy-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://redfire:redfire123@postgres:5432/redfire
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - redfire-network
+
+  data-service:
+    build:
+      context: ./apps/data-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql://redfire:redfire123@postgres:5432/redfire
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - redfire-network
+
+  user-service:
+    build:
+      context: ./apps/user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8000"
+    environment:
+      - DATABASE_URL=postgresql://redfire:redfire123@postgres:5432/redfire
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - redfire-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  redfire-network:
+    driver: bridge
