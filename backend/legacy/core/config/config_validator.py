@@ -213,8 +213,8 @@ class ConfigFileHandler(FileSystemEventHandler):
             self.logger.error(f"重新加载配置失败: {e}")
 
 
-class LegacyValidationConfigManager:
-    """遗留配置验证管理器"""
+class ConfigManager:
+    """配置管理器"""
     
     def __init__(self):
         self.config = {}

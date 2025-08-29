@@ -14,7 +14,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 
 from .base_config import BaseConfig, ConfigMetadata
-from .config_manager import LegacyConfigManager
+from .config_manager import ConfigManager
 from ..infrastructure.exceptions import ConfigurationError
 from pydantic import Field, validator
 
@@ -141,8 +141,8 @@ class LegacyConfig(BaseConfig):
 class LegacyConfigIntegrator:
     """Legacy配置整合器"""
     
-    def __init__(self, config_manager: Optional[LegacyConfigManager] = None):
-        self.config_manager = config_manager or LegacyConfigManager()
+    def __init__(self, config_manager: Optional[ConfigManager] = None):
+        self.config_manager = config_manager or ConfigManager()
         self.legacy_config: Optional[LegacyConfig] = None
         self.paths: Optional[LegacyPaths] = None
         self._integration_complete = False

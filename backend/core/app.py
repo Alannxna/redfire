@@ -131,35 +131,11 @@ class RedFireApplication:
         try:
             # 认证路由
             try:
-                from api import auth_router
+                from api.auth_routes import router as auth_router
                 self.app.include_router(auth_router)  # auth_router 已经有 /api/auth 前缀
                 logger.info("认证路由注册完成")
             except ImportError as e:
                 logger.warning(f"认证路由导入失败: {e}")
-            
-            # 基础路由
-            try:
-                from api import base_router
-                self.app.include_router(base_router)
-                logger.info("基础路由注册完成")
-            except ImportError as e:
-                logger.warning(f"基础路由导入失败: {e}")
-            
-            # 交易路由
-            try:
-                from api import order_router
-                self.app.include_router(order_router)
-                logger.info("交易路由注册完成")
-            except ImportError as e:
-                logger.warning(f"交易路由导入失败: {e}")
-            
-            # 策略路由
-            try:
-                from api import strategy_router
-                self.app.include_router(strategy_router)
-                logger.info("策略路由注册完成")
-            except ImportError as e:
-                logger.warning(f"策略路由导入失败: {e}")
             
             # 图表引擎路由
             try:
