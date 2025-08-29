@@ -1,0 +1,208 @@
+# RedFire 数据库服务 Docker Compose 配置
+# ==========================================
+# 
+# 为RedFire量化交易平台提供完整的数据库服务栈
+# 包括MySQL、Redis、InfluxDB、MongoDB等服务
+
+version: '3.8'
+
+services:
+  # MySQL 主数据库
+  mysql-master:
+    image: mysql:8.0
+    container_name: redfire-mysql-master
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-vnpy}
+      MYSQL_USER: ${DB_USER:-redfire}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_master_data:/var/lib/mysql
+      - ./mysql/master.cnf:/etc/mysql/conf.d/master.cnf
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --max-connections=200
+      --thread-cache-size=16
+      --query-cache-type=1
+      --query-cache-size=32M
+    networks:
+      - redfire-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MySQL 从数据库 (读写分离)
+  mysql-slave:
+    image: mysql:8.0
+    container_name: redfire-mysql-slave
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-vnpy}
+      MYSQL_USER: ${DB_USER:-redfire}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - "${DB_SLAVE_PORT:-3307}:3306"
+    volumes:
+      - mysql_slave_data:/var/lib/mysql
+      - ./mysql/slave.cnf:/etc/mysql/conf.d/slave.cnf
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --read-only=1
+      --super-read-only=1
+    networks:
+      - redfire-network
+    depends_on:
+      - mysql-master
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis 缓存服务
+  redis:
+    image: redis:7-alpine
+    container_name: redfire-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - redfire-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # InfluxDB 时序数据库
+  influxdb:
+    image: influxdb:2.7
+    container_name: redfire-influxdb
+    restart: unless-stopped
+    ports:
+      - "${INFLUX_PORT:-8086}:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_ADMIN_USER:-admin}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASSWORD:-admin123}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:-redfire}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:-trading_data}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-redfire-token}
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    networks:
+      - redfire-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MongoDB 日志存储
+  mongodb:
+    image: mongo:7
+    container_name: redfire-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-redfire_logs}
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./mongodb/init.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - redfire-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Adminer 数据库管理界面
+  adminer:
+    image: adminer:latest
+    container_name: redfire-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - redfire-network
+    depends_on:
+      - mysql-master
+      - mysql-slave
+
+  # Redis Commander Redis管理界面
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redfire-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    networks:
+      - redfire-network
+    depends_on:
+      - redis
+
+  # Mongo Express MongoDB管理界面
+  mongo-express:
+    image: mongo-express:latest
+    container_name: redfire-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@mongodb:27017/
+    networks:
+      - redfire-network
+    depends_on:
+      - mongodb
+
+# 网络配置
+networks:
+  redfire-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# 数据卷配置
+volumes:
+  mysql_master_data:
+    driver: local
+  mysql_slave_data:
+    driver: local
+  redis_data:
+    driver: local
+  influxdb_data:
+    driver: local
+  influxdb_config:
+    driver: local
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
